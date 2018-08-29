@@ -1,23 +1,8 @@
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.stream.DoubleStream;
+
 
 public class RecommenderSystem {
-	static void show2darray(String[][] Array2D) {
-		for (String[] row: Array2D)
-			for (int i=0; i<row.length; i++)
-				System.out.printf("%s%s", row[i], (i==row.length-1) ? '\n' : ", ");
-	}
 	
-	static void show2darray(double[][] Array2D) {
-		for (double[] row: Array2D)
-			for (int i=0; i<row.length; i++)
-				System.out.printf("%.3f%s", row[i], (i==row.length-1) ? '\n' : ", ");
-	}
-
 	public static void main(String[] args) {
 		// test data
 		String[][] users_interests = {
@@ -38,27 +23,30 @@ public class RecommenderSystem {
 				{"libsvm", "regression", "support vector machines"}
 		};
 		
-//		show2darray(users_interests);
-		double[] d = {1.1, 2.2, 3.3};
-		System.out.println(DoubleStream.of(d).sum());
+//		recommendation system object
+		Recommender[] rs = new Recommender[3];
 		
-		HashMap<Integer, String> set = new HashMap<Integer, String>();
-		int ct = 0;
-		for (String[] user_interests: users_interests)
-			for (String user_interest: user_interests)
-				if (!set.containsValue(user_interest)) {
-					set.put(ct, user_interest);
-					ct++;
-				}
-                    
-		MostPopular popular = new MostPopular(users_interests);
-		Map<String, Integer> counter = popular.popular();
-		System.out.println(counter);
+//		most popular
+		rs[0] = new MostPopular(users_interests);
+		Map<String, Integer> popular = ((MostPopular) rs[0]).popular(users_interests[0]);
+		System.out.println("\nrecommed user_0 some items accordong to the most popular:");
+		for (Map.Entry<String, Integer> item: popular.entrySet())
+			System.out.printf("%30s: %d\n",  item.getKey(), item.getValue());
 		
-		Recommender rs = new Recommender(users_interests);
+//		user-based
+		rs[1] = new UserBased(users_interests);
+		Map<String, Double> userbased = ((UserBased) rs[1]).user_based(0, false);
+		System.out.println("\nrecommed user_0 some items accordong to the user-based collaborative filtering:");
+		for (Map.Entry<String, Double> item: userbased.entrySet())
+			System.out.printf("%30s: %.3f\n",  item.getKey(), item.getValue());
 		
-		System.out.println(rs.unique.containsKey(1));
-		show2darray(rs.user_similarity);
+//		item-based
+		rs[2] = new ItemBased(users_interests);
+		Map<String, Double> itembased = ((ItemBased) rs[2]).item_based(0, false);
+		System.out.println("\nrecommed user_0 some items accordong to the item-based collaborative filtering:");
+		for (Map.Entry<String, Double> item: itembased.entrySet())
+			System.out.printf("%30s: %.3f\n",  item.getKey(), item.getValue());
+		
 	}
 
 }
